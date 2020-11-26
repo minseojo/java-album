@@ -9,11 +9,11 @@ import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.xml.transform.Source;
-/* 	1. pair<int,string> 이용해서 (index, 사진 이름) 저장
- 	2. 폴더없으면 만들기
-	3. 사진 삭제
-	4. 사진 검색
+/*
+ * 텍스트 저장	
+ * 사진 검색
 */
+
 public class image_change extends JFrame implements ActionListener {
 	private BufferedImage img; //화면 이미지 출력
 	private JButton button1, button2, button3, button4, button5; //다음 버튼, 이전 버튼, 사진 추가, 사진 삭제, 사진 검색
@@ -22,7 +22,8 @@ public class image_change extends JFrame implements ActionListener {
 	private int MAX_SIZE = 0, imageCnt = 0; //이미지 최대 개수, 이미지 추가 개수
 	private boolean flag = false, flag2 = false;// (다음, 이전) , (사진 추가, 사진 삭제)
 	private String imageName; // 추가된 사진 이름
-	
+	private JButton btn = new JButton("확인");
+	private JButton btn2 = new JButton("취소");
 	Vector<String> list = new Vector<String>();  // 사진 경로 이름 저장
 
 	JFileChooser fc;
@@ -33,13 +34,13 @@ public class image_change extends JFrame implements ActionListener {
 		fc = new JFileChooser(); //폴더 파일 
 		fc.setMultiSelectionEnabled(true);
 		JPanel panel = new JPanel(); // 버튼들
-
+		JPanel panel2 = new JPanel();
+		
 		setTitle("조민서 앨범"); 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setResizable(false); // 창 조정 x
 
 		imgPanel = new ChangeImagePanel();
-		
 		// 초기 상태
 		list.add("image\\0.jpg"); // 버튼인덱스를 1 부터 시작해서 0.jpg는 안나옴(버튼으로 못봄, 모든사진을 삭제해서 사진이 하나도 없으면 나옴)
 		list.add("image\\1.jpg");
@@ -74,13 +75,15 @@ public class image_change extends JFrame implements ActionListener {
 		panel.add(button4);
 		panel.add(button5);
 		panel.setBackground(Color.darkGray);
-				
+		
+		add(panel2, BorderLayout.NORTH);
 		add(imgPanel, BorderLayout.CENTER);
 		add(panel, BorderLayout.SOUTH);
 		pack();
 		setVisible(true);
 		
 	}
+	
 	class ChangeImagePanel extends JPanel {
 		public ChangeImagePanel() {
 			
@@ -105,6 +108,10 @@ public class image_change extends JFrame implements ActionListener {
 
 		String imgFile = ".jpg"; // 나중에 png, jpg, 등등
 		//다음
+		if(e.getSource() == btn) {
+			System.out.println("사진 이름: " + tfd.getText());
+			System.out.println("메모 내용: " + tfd2.getText());
+		}
 		if(e.getSource() == button1 && button_index < MAX_SIZE-1) { // 사진 개수가 MAX면 button_index가 안늘어남.
 			button_index++;
 			flag = true; // 다음 	
@@ -123,7 +130,7 @@ public class image_change extends JFrame implements ActionListener {
 		    // 사진추가 창 이름
 		    fc.setDialogTitle("이미지 선택 (jpg가 아니면 시간이 오래 걸립니다.)");
 
-		    // 다이어로그 생성
+		    // 다이얼로그 생성
 		    int Dialog = fc.showOpenDialog(this);
 		    // 예 확인시
 		    if(Dialog == JFileChooser.APPROVE_OPTION) {
@@ -141,7 +148,9 @@ public class image_change extends JFrame implements ActionListener {
 		        MAX_SIZE++; // 사진 최대 개수
 		        }
 	        }
+		    prepareGui(null);
 		}
+	
 		
 		// 사진 삭제
 		if(e.getSource() == button4 && button_index > 0) {
@@ -150,12 +159,13 @@ public class image_change extends JFrame implements ActionListener {
 			if(button_index == 0 && MAX_SIZE > 2) button_index = 1; // 사진은 여러장인데, 첫 번째 사진을 지우면 이미지 없음사진이 나오는거 방지
 			MAX_SIZE--;			
 			flag2 = true;
-			System.out.println(button_index + 1 + "번째 사진을 삭제 했습니다.");
+			System.out.println(button_index + 1 + "페이지 사진을 삭제 했습니다.");
 			if(MAX_SIZE == 1) System.out.println("사진을 전부 삭제해서 사진이 없습니다.");
 		}
 		
 		// 행동
 		try {
+			
 			if(flag == true)
 				img = ImageIO.read(new File(list.get(button_index).toString())); //이미지 있으면 가져오기
 			if(flag2 == true)
@@ -220,8 +230,7 @@ public class image_change extends JFrame implements ActionListener {
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        }
-		
+        }		
 	}
 
 	// 삽입 버튼을 이용한 파일 복사
@@ -231,8 +240,7 @@ public class image_change extends JFrame implements ActionListener {
         //복사파일객체생성
         File copyFile = new File(copyFilePath);
         System.out.println(copyFilePath + "사진을 복사했습니다.");
-        try {
-            
+        try {            
             FileInputStream fis = new FileInputStream(Path); //읽을파일
             FileOutputStream fos = new FileOutputStream(copyFile); //복사할파일
             
@@ -253,7 +261,46 @@ public class image_change extends JFrame implements ActionListener {
             e.printStackTrace();
         }
 	}
+	
+	
+	JTextField tfd = new JTextField(20); // 사진 이름 입력 
+	JTextField tfd2 = new JTextField(20); // 메모 내용 입력	
+	public void prepareGui(Frame mainFrame) {
+		mainFrame = new Frame("사진 정보");
+		mainFrame.setSize(330,150);
+		mainFrame.addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent windowEvent) {
+				System.exit(0);
+			}
+		});				
 		
+		Panel p1 = new Panel();
+		p1.add(new Label("사진 이름: "));
+		p1.add(tfd);
+		p1.setSize(200, 100);
+		
+		Panel p2 = new Panel();
+		p2.add(new Label("메모 내용: "));
+		p2.add(tfd2);
+		p1.setSize(200, 100);
+
+		Panel p3 = new Panel();
+		p3.add(btn);
+		p3.add(btn2);
+	
+		Panel p4 = new Panel();
+		p4.add(p1);
+		p4.add(p2);
+		p4.add(p3);
+		
+		btn.addActionListener(this);
+		btn2.addActionListener(this);
+
+		mainFrame.add(p4);
+		mainFrame.setVisible(true);
+
+	}
+
 	public static void main(String[] args) {
 		new image_change();
 	}
