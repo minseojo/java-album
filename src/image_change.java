@@ -2,6 +2,8 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.*;
 import java.io.*;
+import java.lang.reflect.Member;
+import java.util.HashMap;
 import java.util.Vector;
 
 import javax.imageio.*;
@@ -10,7 +12,7 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.xml.transform.Source;
 /*
- * 텍스트 저장	
+ * 서브 프레임이 안꺼져서 저장할때, 내용이 n*n+1/2개씩 나옴	
  * 사진 검색
 */
 
@@ -19,13 +21,16 @@ public class image_change extends JFrame implements ActionListener {
 	private JButton button1, button2, button3, button4, button5; //다음 버튼, 이전 버튼, 사진 추가, 사진 삭제, 사진 검색
 	private JPanel imgPanel; // 이미지 나오는 창
 	private int button_index = 0; // 이미지 인덱스(1 ~ 사진 최대 개수, 0은 이미지없음 사진)
-	private int MAX_SIZE = 0, imageCnt = 0; //이미지 최대 개수, 이미지 추가 개수
-	private boolean flag = false, flag2 = false;// (다음, 이전) , (사진 추가, 사진 삭제)
+	private int MAX_SIZE = 0, imageCnt = 1; //이미지 최대 개수, 이미지 추가 개수 ()
+	private boolean flag = false, flag2 = false, flag3 = false;// (다음, 이전) , (사진 추가, 사진 삭제)
 	private String imageName; // 추가된 사진 이름
-	private JButton btn = new JButton("확인");
-	private JButton btn2 = new JButton("취소");
+	private JButton btn = new JButton("저장");
 	Vector<String> list = new Vector<String>();  // 사진 경로 이름 저장
+	Vector<String> name = new Vector<String>(); // 사진 이름 저장
+	Vector<String> memo = new Vector<String>(); // 사진 메모 내용
 
+	private JTextField tfd = new JTextField(20); // 사진 이름 입력 
+	private JTextField tfd2 = new JTextField(20); // 메모 내용 입력	
 	JFileChooser fc;
 	public image_change() {
 		
@@ -34,7 +39,7 @@ public class image_change extends JFrame implements ActionListener {
 		fc = new JFileChooser(); //폴더 파일 
 		fc.setMultiSelectionEnabled(true);
 		JPanel panel = new JPanel(); // 버튼들
-		JPanel panel2 = new JPanel();
+		JPanel panel2 = new JPanel(); // 사진 이름, 메모 내용
 		
 		setTitle("조민서 앨범"); 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -44,7 +49,10 @@ public class image_change extends JFrame implements ActionListener {
 		// 초기 상태
 		list.add("image\\0.jpg"); // 버튼인덱스를 1 부터 시작해서 0.jpg는 안나옴(버튼으로 못봄, 모든사진을 삭제해서 사진이 하나도 없으면 나옴)
 		list.add("image\\1.jpg");
-		
+		name.add("이미지 없음");
+		name.add("고양이");
+		memo.add("모든 사진을 삭제 했을때 나타내는 사진.");
+		memo.add("귀여운 우리집 고양이 감미");
 		MAX_SIZE += 2; // 0.jpg = 이미지없음 버튼,  1.jpg = 처음 기본 이미지 => 사진 최대 개수는 0+2 
 		
 		// 컴포넌트(버튼) 만들기
@@ -76,9 +84,17 @@ public class image_change extends JFrame implements ActionListener {
 		panel.add(button5);
 		panel.setBackground(Color.darkGray);
 		
-		add(panel2, BorderLayout.NORTH);
+		//panel2.add(new JLabel(name.get(button_index).toString()));
+		panel2.setLayout(new GridLayout(2,2));
+
+		panel2.add(new JLabel("사진 이름: "));
+		panel2.add(new JLabel(name.get(button_index)));
+		panel2.add(new JLabel("텍스트 내용: "));
+		panel2.add(new JLabel(memo.get(button_index)));
+		
 		add(imgPanel, BorderLayout.CENTER);
 		add(panel, BorderLayout.SOUTH);
+		add(panel2, BorderLayout.NORTH);
 		pack();
 		setVisible(true);
 		
@@ -106,29 +122,41 @@ public class image_change extends JFrame implements ActionListener {
 	// 사진 (다음, 이전)
 	public void actionPerformed(ActionEvent e) {
 
-		String imgFile = ".jpg"; // 나중에 png, jpg, 등등
-		//다음
+		//사진삽입 저장 버튼
 		if(e.getSource() == btn) {
-			System.out.println("사진 이름: " + tfd.getText());
-			System.out.println("메모 내용: " + tfd2.getText());
+			flag3 = true;
+			name.add(tfd.getText());
+			memo.add(tfd2.getText());
+			System.out.println("저장한 사진 이름: " + name.get(MAX_SIZE - 1).toString());
+			System.out.println("저장한 사진 내용: " + memo.get(MAX_SIZE - 1).toString());
+			btn.setEnabled(false); // 저장 버튼 비활성화 (사용자가 한번만 저장하게)
 		}
+		
+		//다음
 		if(e.getSource() == button1 && button_index < MAX_SIZE-1) { // 사진 개수가 MAX면 button_index가 안늘어남.
 			button_index++;
 			flag = true; // 다음 	
+			System.out.println("사진 이름: " + name.get(button_index));
+			System.out.println("사진 내용: " + memo.get(button_index));
 		// 이전
 		} else if(e.getSource() == button2 && button_index > 1 && MAX_SIZE > 0) { // 사진 개수가 1보다 작으면 button_index가 안내려감. 사진 다 지우면 button_index == 0되서, 이미지 없음 나옴.
 			button_index--;
 			flag = true; // 이전
+			System.out.println("사진 이름: " + name.get(button_index));
+			System.out.println("사진 내용: " + memo.get(button_index));
 		}
 		
 		//사진 삽입
 		if(e.getSource() == button3) {
-			// jpg, png가 디폴트값
+			
+		    prepareGui(null);
+			btn.setEnabled(true); // 들어갈때, 다시 저장버튼 활성화
+		    // jpg, png가 디폴트값
 			FileNameExtensionFilter filter = new FileNameExtensionFilter("jpg", "png", "jpg", "png");
 		    // 위 내용 적용
 		    fc.setFileFilter(filter);
 		    // 사진추가 창 이름
-		    fc.setDialogTitle("이미지 선택 (jpg가 아니면 시간이 오래 걸립니다.)");
+		    fc.setDialogTitle("이미지 선택 ) 파일 이름(경로)을 변경하지 마세요)");
 
 		    // 다이얼로그 생성
 		    int Dialog = fc.showOpenDialog(this);
@@ -139,56 +167,56 @@ public class image_change extends JFrame implements ActionListener {
 		      	File[] f = fc.getSelectedFiles();
 		      	
 		        for(File n : f) {
-		        System.out.println(++imageCnt + "번째 추가한 사진 이름: " + n.getName());
-		        imageName = n.getName();
-		        
+		        System.out.println(imageCnt++ + "번째 추가한 사진 이름: " + n.getName());
+		        imageName = n.getName();		        
 		        copyFile(fc.getSelectedFile(), imageName); //이미지 파일 집어넣기(img경로, 복사할 img이름)
+		        }
 		        list.add(new String("image\\" + imageName));
 		        button_index = MAX_SIZE;
 		        MAX_SIZE++; // 사진 최대 개수
-		        }
-	        }
-		    prepareGui(null);
+	        }		   
 		}
 	
 		
 		// 사진 삭제
-		if(e.getSource() == button4 && button_index > 0) {
-			list.remove(button_index);
-			button_index--;
-			if(button_index == 0 && MAX_SIZE > 2) button_index = 1; // 사진은 여러장인데, 첫 번째 사진을 지우면 이미지 없음사진이 나오는거 방지
-			MAX_SIZE--;			
+		if(e.getSource() == button4 && button_index > 0) {		
 			flag2 = true;
 			System.out.println(button_index + 1 + "페이지 사진을 삭제 했습니다.");
+			System.out.println("삭제한 사진 이름: " + name.get(button_index));
+			System.out.println("삭제한 사진 내용: " + memo.get(button_index));
+			list.remove(button_index);
+			name.remove(button_index);
+			memo.remove(button_index);
+			button_index--;
+			if(button_index == 0 && MAX_SIZE > 2) button_index = 1; // 사진은 여러장인데, 첫 번째 사진을 지우면 이미지 없음사진이 나오는거 방지
+			MAX_SIZE--;	
 			if(MAX_SIZE == 1) System.out.println("사진을 전부 삭제해서 사진이 없습니다.");
 		}
-		
 		// 행동
-		try {
-			
+		try {			
 			if(flag == true)
 				img = ImageIO.read(new File(list.get(button_index).toString())); //이미지 있으면 가져오기
 			if(flag2 == true)
 				img = ImageIO.read(new File(list.get(button_index).toString()));
 		} catch (IOException e1) {
 			e1.printStackTrace();
+		}	finally {
+			// 의미있는 행동인 경우에만 페이지수를 나타냄.
+			if(flag == true || flag2 == true || flag3 == true) {		
+				System.out.println("현재 페이지: " + button_index);			
+				System.out.println("");
+			}
+			//마지막 초기화
+			flag = false;
+			flag2 = false;
+			flag3 = false;
+			imgPanel.repaint();
 		}
-		
-		// 의미있는 행동인 경우에만 페이지수를 나타냄.
-		if(flag == true || flag2 == true) {
-			System.out.println("현재 페이지: " + button_index);
-			System.out.println("");
-		}
-		
-		//마지막 초기화
-		flag = false;
-		flag2 = false;
-		imgPanel.repaint();
 	}
 	
 	// image폴더가 없으면 image폴더를 만들고 미리 만들어둔 image_set폴더에 있는 이미지 2개를 복사.
 	public void mkDir() {
-		String path = "image"; //폴더 경로
+		String path = "image\\"; //폴더 경로
 		File Folder = new File(path);
 
 		// 해당 디렉토리가 없을경우 디렉토리를 생성합니다.
@@ -262,40 +290,37 @@ public class image_change extends JFrame implements ActionListener {
         }
 	}
 	
-	
-	JTextField tfd = new JTextField(20); // 사진 이름 입력 
-	JTextField tfd2 = new JTextField(20); // 메모 내용 입력	
-	public void prepareGui(Frame mainFrame) {
-		mainFrame = new Frame("사진 정보");
-		mainFrame.setSize(330,150);
+	public void prepareGui(JFrame mainFrame) {
+		mainFrame = new JFrame("사진 정보 (잠시만 기다려 주세요.)");
+		mainFrame.setSize(380,165);
 		mainFrame.addWindowListener(new WindowAdapter() {
-			public void windowClosing(WindowEvent windowEvent) {
-				System.exit(0);
+			public void windowClosing(WindowEvent windowEvent) {	
 			}
 		});				
 		
+	
 		Panel p1 = new Panel();
-		p1.add(new Label("사진 이름: "));
+		p1.add(new Label("사진 이름 바꾸기: "));
 		p1.add(tfd);
 		p1.setSize(200, 100);
 		
 		Panel p2 = new Panel();
-		p2.add(new Label("메모 내용: "));
+		p2.add(new Label("사진 텍스트 추가: "));
 		p2.add(tfd2);
 		p1.setSize(200, 100);
 
 		Panel p3 = new Panel();
+		btn.setBackground(Color.white);
+		p3.add(new Label("바꿀 내용을 저장하고 X를 누르세요."));
 		p3.add(btn);
-		p3.add(btn2);
-	
+		
 		Panel p4 = new Panel();
 		p4.add(p1);
 		p4.add(p2);
 		p4.add(p3);
 		
 		btn.addActionListener(this);
-		btn2.addActionListener(this);
-
+		mainFrame.setResizable(false); // 창 조정 x
 		mainFrame.add(p4);
 		mainFrame.setVisible(true);
 
@@ -310,4 +335,5 @@ public class image_change extends JFrame implements ActionListener {
 https://calsifer.tistory.com/239
 https://programmingsummaries.tistory.com/61    GUI 구현
 https://raccoonjy.tistory.com/17
+https://halfmoon9.tistory.com/12
 */
