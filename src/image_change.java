@@ -42,6 +42,8 @@ public class image_change extends JFrame implements ActionListener {
 		char[] arr = new char[1000];
 		
 		File file = new File("image\\test.txt");
+
+		  
 		try (BufferedReader br = new BufferedReader(new FileReader(file))) {
 		    String line;
 		    int i=0;
@@ -66,7 +68,7 @@ public class image_change extends JFrame implements ActionListener {
 				}
 				System.out.println(s);
 				list.add(new String("image\\" + s));
-				name.add("image\\" + s);
+				name.add(s);
 				memo.add("ASDa");
 				start=i+1;
 			}
@@ -329,11 +331,22 @@ public class image_change extends JFrame implements ActionListener {
 		if (!Folder.exists()) {
 			try{
 			    Folder.mkdir(); //폴더 생성합니다.
-			    System.out.println("폴더가 생성되었습니다.");
+			    System.out.println("이미지를 저장할 image폴더가 생성되었습니다.");
+				FileWriter fileWriter = new FileWriter("image\\test.txt",true); // 폴더 생성과 동시에, 이미지 경로 저장할 파일 생성, 이어서 쓰기
+				FileWriter fileWriter2 = new FileWriter("image\\test2.txt",true); //  이미지 이름
+				FileWriter fileWriter3 = new FileWriter("image\\test3.txt",true); //  이미지 메모내용	
+				
+				fileWriter.write("현재 저장된 사진|"); // 사진 경로   
+				fileWriter2.write("현재 저장된 사진 이름|"); // 사진 이름
+				fileWriter3.write("현재 저장된 사진 내용|"); // 사진 내용
+				fileWriter.close();
+				fileWriter2.close();
+				fileWriter3.close();
 		    } catch(Exception e) {
 		    	e.getStackTrace();
 			}        
 	     }
+		  
 	}
 		
 	/* 초기 앨범 기본 파일 복사
@@ -369,7 +382,7 @@ public class image_change extends JFrame implements ActionListener {
         String copyFilePath = "image\\" + imageName;
         //복사파일객체생성
         File copyFile = new File(copyFilePath);
-        System.out.println(copyFilePath + "사진을 복사했습니다.");
+        System.out.println(copyFilePath + "에 사진을 복사했습니다.");
         try {            
             FileInputStream fis = new FileInputStream(Path); //읽을파일
             FileOutputStream fos = new FileOutputStream(copyFile); //복사할파일
