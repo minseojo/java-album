@@ -66,59 +66,58 @@ public class image_change extends JFrame implements ActionListener {
 		for(int i=0; i<buf.length(); i++) { //메모장을 처음에 만들고 0번째 인덱스에 |를 초기화시켰으므로 1부터
 			arr[i] = buf.charAt(i);
 		}
-		System.out.println("현재 저장된 사진");
-		showFilesInDIr("image\\");	
-		int cnt=0;
-		int start=0;
+
+		showFilesInDIr("image\\");	// "image\\"폴더에 있는 파일들 전부 가져와서 list2에 경로 집어 넣기
+		
+		System.out.println("현재 저장된 사진 이름 (시간이 없다면 이름을 검색하세요.)");
+		for(int i=0; i<list2.size(); i++) {
+			if(list2.get(i).equals("image\\test.txt")) continue; // 사진정보를 입력한 메모장은 컨티뉴
+			MAX_SIZE++;
+			list.add(list2.get(i)); //
+
+		}
+		
+		boolean flag5=false,flag6=false;
+		for(int i=1; i<list.size(); i++) {
+			String x =list.get(i);
+			flag5=false;
+			flag6=false;
+			if(buf.contains(x)) {
+				name2 = "";
+				memo2 = "";
+				int len = list.get(i).length(); 
+				//len은 경로의 글자수
+				//buf.lastIndexOf(x)는 경로가 시작하는 위치 
+				//따라서 경로시작위치+경로글자수 뒤에는 사진 이름, 사진 내용이 (; , :)로 구분되어 적혀있음
+				for(int j= buf.lastIndexOf(x)+len; j< buf.lastIndexOf(x)+44; j++) {
+					if(arr[j] == '|') break;
+					if(arr[j] == ';') {
+						flag5 = true;
+						name2 = "";
+						j++;
+					}
+					if(arr[j] == ':') {
+						flag6=true;
+						memo2 = "";
+						j++;
+					}
+					if(flag5==true && flag6==false) {
+						name2+=arr[j];
+					}
+					if(flag6 == true)
+						memo2+=arr[j];
+				}
+				name.add(name2);
+				memo.add(memo2);				
+			}			
+		}
+		
+		for(int i=1; i<list.size(); i++) {
+			System.out.println(name.get(i));
+		}
 		String s = ""; // 사진 경로
 		String s2 = "";
 		String s3 = ""; //사진 내용
-		boolean flag5 = false, flag6 = false;
-		System.out.println("현재 저장된 사진 이름 (시간이 없다면 사진 이름을 검색 하세요.)");
-		for(int i=0; i<1000; i++) { // 0은 |로 초기화 했으므로 1부터 시작
-			if(arr[i] == '|') { // 만약 구분자 나오면
-				s = ""; // 초기화
-				s2 = "";
-				s3 = ""; // 초기화
-				flag5 = false;
-				flag6 = false; // 초기화
-				//MAX_SIZE++;
-				for(int j=start; j<i; j++) {
-					if(arr[j] == ';') {
-						s2="";
-						flag5=true;
-						j++;
-					}
-					if(arr[j] == ':') { // :전에는 사진경로, :이후에는 사진 내용
-						s3="";    
-						flag6=true;
-						j++;
-					}
-					if(flag5 == false) { // 사진 경로
-						s+=arr[j];
-					}
-					if(flag5==true && flag6 == false) {
-						s2+=arr[j];
-					}
-					s3+=arr[j];
-				}
-				if(cnt!=0) // 파일을 처음부터 읽어야 컴파일이 되는데, 처음 내용은 null이므로 넘어감
-					System.out.println(cnt + ". "+ s2); // 사진 이름 출력
-					//name.add(s2);  // 사진 이름 저장
-					//memo.add(s3); //사진 내용 저장
-					start=i+1; // 다음 조건이 성립할때의 시작값은 이전 조건이 끝나고 다음 인덱스값
-					cnt++; // 현재 저장된 총 사진 개수
-			}
-		}
-		
-		for(int i=0; i<list2.size(); i++) {
-			if(list2.get(i).equals("image\\test.txt")) continue; // 사진정보를 입력한 메모장은 컨티뉴
-			System.out.println(list2.get(i));
-			MAX_SIZE++;
-			list.add(list2.get(i));
-			name.add("sd");
-			memo.add("ASDas");
-		}
 		
 		imgPanel = new ChangeImagePanel();
 		JPanel panel = new JPanel(); // 버튼들
@@ -205,8 +204,7 @@ public class image_change extends JFrame implements ActionListener {
 	        if (file.isDirectory()) {
 	            showFilesInDIr(file.getPath());
 	        } else {
-	            list2.add(file.getPath());
-	            System.out.println(file);
+	            list2.add(file.getPath()); 
 	        }
 	    }
 	}
@@ -287,7 +285,7 @@ public class image_change extends JFrame implements ActionListener {
 	    	String filePath = "image\\test.txt"; //사진 경로, 내용
 			try {
 				FileWriter fileWriter = new FileWriter(filePath,true);
-				fileWriter.write(imageName + ";" + name.get(button_index) + ":" + memo.get(button_index) + "|"); // |로 구분자를 정함				   
+				fileWriter.write("image\\" + imageName + ";" + name.get(button_index) + ":" + memo.get(button_index) + "|"); // |로 구분자를 정함				   
 				fileWriter.close();
 			  } catch (IOException e1) {
 				  e1.printStackTrace();
@@ -504,4 +502,40 @@ https://calsifer.tistory.com/239
 https://programmingsummaries.tistory.com/61    GUI 구현
 https://raccoonjy.tistory.com/17
 https://halfmoon9.tistory.com/12
+
+for(int i=0; i<1000; i++) { // 0은 |로 초기화 했으므로 1부터 시작
+			if(arr[i] == '|') { // 만약 구분자 나오면
+				s = ""; // 초기화
+				s2 = "";
+				s3 = ""; // 초기화
+				flag5 = false;
+				flag6 = false; // 초기화
+				//MAX_SIZE++;
+				for(int j=start; j<i; j++) {
+					if(arr[j] == ';') {
+						s2="";
+						flag5=true;
+						j++;
+					}
+					if(arr[j] == ':') { // :전에는 사진경로, :이후에는 사진 내용
+						s3="";    
+						flag6=true;
+						j++;
+					}
+					if(flag5 == false) { // 사진 경로
+						s+=arr[j];
+					}
+					if(flag5==true && flag6 == false) {
+						s2+=arr[j];
+					}
+					s3+=arr[j];
+				}
+				if(cnt!=0) // 파일을 처음부터 읽어야 컴파일이 되는데, 처음 내용은 null이므로 넘어감
+					System.out.println(cnt + ". "+ s2); // 사진 이름 출력
+					//name.add(s2);  // 사진 이름 저장
+					//memo.add(s3); //사진 내용 저장
+					start=i+1; // 다음 조건이 성립할때의 시작값은 이전 조건이 끝나고 다음 인덱스값
+					cnt++; // 현재 저장된 총 사진 개수
+			}
+		}
 */
