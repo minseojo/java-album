@@ -41,6 +41,11 @@ public class image_change extends JFrame implements ActionListener {
 		fc.setMultiSelectionEnabled(true);
 		String buf = "";
 
+		list.add("현재 저장된 사진");
+		name.add("첫번째 사진 안나와서 삽입");
+		memo.add("첫번째 사진 안나와서 삽입");
+		MAX_SIZE++;
+		
 		char[] arr = new char[1000];
 		
 		File file = new File("image\\test.txt");		  
@@ -77,7 +82,7 @@ public class image_change extends JFrame implements ActionListener {
 				s3 = ""; // 초기화
 				flag5 = false;
 				flag6 = false; // 초기화
-				MAX_SIZE++;
+				//MAX_SIZE++;
 				for(int j=start; j<i; j++) {
 					if(arr[j] == ';') {
 						s2="";
@@ -107,6 +112,9 @@ public class image_change extends JFrame implements ActionListener {
 		}
 		
 		for(int i=0; i<list2.size(); i++) {
+			if(list2.get(i).equals("image\\test.txt")) continue; // 사진정보를 입력한 메모장은 컨티뉴
+			System.out.println(list2.get(i));
+			MAX_SIZE++;
 			list.add(list2.get(i));
 			name.add("sd");
 			memo.add("ASDas");
