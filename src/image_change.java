@@ -29,7 +29,7 @@ public class image_change extends JFrame implements ActionListener {
 	Vector<String> list = new Vector<String>();  // 사진 경로 이름 저장
 	Vector<String> name = new Vector<String>(); // 사진 이름 저장
 	Vector<String> memo = new Vector<String>(); // 사진 메모 내용
-	HashMap<String, String> list2 = new HashMap<String,String>();
+	Vector<String> list2 = new Vector<String>();
 	private JTextField tfd = new JTextField(null, 20); // 사진 이름 입력 
 	private JTextField tfd2 = new JTextField(null, 20); // 메모 내용 입력
 	String name2, memo2;
@@ -61,7 +61,8 @@ public class image_change extends JFrame implements ActionListener {
 		for(int i=0; i<buf.length(); i++) { //메모장을 처음에 만들고 0번째 인덱스에 |를 초기화시켰으므로 1부터
 			arr[i] = buf.charAt(i);
 		}
-		
+		System.out.println("현재 저장된 사진");
+		showFilesInDIr("image\\");	
 		int cnt=0;
 		int start=0;
 		String s = ""; // 사진 경로
@@ -96,20 +97,27 @@ public class image_change extends JFrame implements ActionListener {
 					}
 					s3+=arr[j];
 				}
-				if(cnt!=0)
-				System.out.println(cnt + ". "+ s2); // 사진 이름 출력
-				list.add(new String("image\\" + s)); // 사진 경로 저장
-				name.add(s2);  // 사진 이름 저장
-				memo.add(s3); //사진 내용 저장
-				start=i+1;
-				cnt++;
+				if(cnt!=0) // 파일을 처음부터 읽어야 컴파일이 되는데, 처음 내용은 null이므로 넘어감
+					System.out.println(cnt + ". "+ s2); // 사진 이름 출력
+					//name.add(s2);  // 사진 이름 저장
+					//memo.add(s3); //사진 내용 저장
+					start=i+1; // 다음 조건이 성립할때의 시작값은 이전 조건이 끝나고 다음 인덱스값
+					cnt++; // 현재 저장된 총 사진 개수
 			}
+		}
+		
+		for(int i=0; i<list2.size(); i++) {
+			list.add(list2.get(i));
+			name.add("sd");
+			memo.add("ASDas");
 		}
 		
 		imgPanel = new ChangeImagePanel();
 		JPanel panel = new JPanel(); // 버튼들
 		JPanel panel2 = new JPanel(); // 사진 이름, 메모 내용
-
+		JPanel panel3 = new JPanel(); // 사진 이름 텍스트, 사진 내용 텍스트
+		JPanel panel4 = new JPanel(); // 2,3 합침
+		
 		label1.setText(name.get(button_index));
 		label2.setText(memo.get(button_index));
 		
@@ -123,6 +131,13 @@ public class image_change extends JFrame implements ActionListener {
 		button3 = new JButton("사진 추가");
 		button4 = new JButton("사진 삭제");
 		button5 = new JButton("사진 검색");
+		
+		//버튼 크기 가로는 480이므로 480/5 = 96 > 가로크기
+		button1.setPreferredSize(new Dimension(90, 35));
+		button2.setPreferredSize(new Dimension(90, 35));
+		button3.setPreferredSize(new Dimension(90, 35));
+		button4.setPreferredSize(new Dimension(90, 35));
+		button5.setPreferredSize(new Dimension(90, 35));
 		
 		// 버튼색 변경
 		button1.setBackground(Color.WHITE);
@@ -147,21 +162,47 @@ public class image_change extends JFrame implements ActionListener {
 		panel.setBackground(Color.darkGray);
 		
 		//panel2.add(new JLabel(name.get(button_index).toString()));
-		panel2.setLayout(new GridLayout(2,2));
-
-		panel2.add(new JLabel("사진 이름: "));
-		panel2.add(label1);
-		panel2.add(new JLabel("사진 내용: "));
-		panel2.add(label2);
+		panel2.setLayout(new GridLayout(1,2));
+		panel2.setBackground(Color.DARK_GRAY);
+		panel3.setLayout(new GridLayout(1,2));
+		panel3.setBackground(Color.DARK_GRAY);
+		JLabel imgN = new JLabel("사진 이름: ");
+		JLabel imgM = new JLabel("사진 내용: ");
+		imgN.setFont(new Font("돋움", Font.BOLD, 22));
+		imgM.setFont(new Font("돋움", Font.BOLD, 22));
+		imgN.setForeground(Color.white);
+		imgM.setForeground(Color.white);
 		
+		panel2.add(imgN);
+		panel2.add(label1);
+		panel3.add(imgM);
+		panel3.add(label2);
+		panel4.add(panel2);
+		panel4.add(panel3);
+		panel4.setLayout(new GridLayout(2,2));
 		add(imgPanel, BorderLayout.CENTER);
 		add(panel, BorderLayout.SOUTH);
-		add(panel2, BorderLayout.NORTH);
+		add(panel4, BorderLayout.NORTH);
 		pack();
 		setVisible(true);
 		
 	}
 	
+	private void showFilesInDIr(String string) {
+		File dir = new File("image\\");
+	    File files[] = dir.listFiles();
+
+	    for (int i = 0; i < files.length; i++) {
+	        File file = files[i];
+	        if (file.isDirectory()) {
+	            showFilesInDIr(file.getPath());
+	        } else {
+	            list2.add(file.getPath());
+	            System.out.println(file);
+	        }
+	    }
+	}
+
 	class ChangeImagePanel extends JPanel {
 		public ChangeImagePanel() {
 			
@@ -347,6 +388,10 @@ public class image_change extends JFrame implements ActionListener {
 				img = ImageIO.read(new File(list.get(button_index).toString()));
 			}
 			
+			label1.setFont(new Font("돋움", Font.BOLD, 22));
+			label2.setFont(new Font("돋움", Font.BOLD, 22));
+			label1.setForeground(Color.white);
+			label2.setForeground(Color.white);
 			label1.setText(name.get(button_index));
 			label2.setText(memo.get(button_index));
 		} catch (IOException e1) {
