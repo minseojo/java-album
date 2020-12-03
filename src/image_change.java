@@ -17,10 +17,9 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.xml.transform.Source;
 /*
- * 서브 프레임이 안꺼져서 저장할때, 내용이 n*n+1/2개씩 나옴	=> 프로그램 최대 사진 2개
- *	추가/
- *		사진 2개 초과시 위험 경보 (서브프레임 프로세스가 안꺼짐)
- *		//역순
+ * 서브 프레임이 안꺼져서 저장할때, 내용이 n*n+1/2개씩 나옴	=> 서브 프로세스 종료 찾기 || 프로그램 최대 사진 2개
+ *	추가/	그림판
+ *		
 */
 
 public class image_change extends JFrame implements ActionListener {
@@ -38,7 +37,7 @@ public class image_change extends JFrame implements ActionListener {
 	private JButton BCbtn1,BCbtn2,BCbtn3,BCbtn4,BCbtn5,BCbtn6,BCbtn7,BCbtn8,BCbtn9,BCbtn10,BCbtn11,BCbtn12;
 	private JPanel imgPanel; // 이미지 나오는 창
 	private int button_index = 0; // 이미지 인덱스(1 ~ 사진 최대 개수, 0은 이미지없음 사진)
-	private int MAX_SIZE = 0, imageCnt = 1; //이미지 최대 개수, 이미지 추가 개수 ()
+	private int MAX_SIZE = 0, imageCnt = 0; //이미지 최대 개수, 이미지 추가 개수 ()
 	private boolean flag = false, flag2 = false, flag3 = false, flag5 = false, flag6 = false;// (다음, 이전) , (사진 추가, 사진 삭제) , name2,memo2 변수적용
 	private String imageName; // 추가된 사진 이름
 	private JButton btn = new JButton("저장");
@@ -58,7 +57,6 @@ public class image_change extends JFrame implements ActionListener {
 	JFileChooser fc = new JFileChooser(); //폴더 선택 파일
 	JLabel[] labels = new JLabel[20]; // 
 	JPanel panel = new JPanel(); // 메인 프레임
-	
 	public image_change() {
 		mkDir(); // image\\폴더가 없으면 image폴더를 만들고 image\\test.txt 파일을 만든다		
 		fc.setMultiSelectionEnabled(true);
@@ -214,7 +212,10 @@ public class image_change extends JFrame implements ActionListener {
 		
 		//사진 삽입
 		if(e.getSource() == button3) {			
-		    
+		    if(imageCnt > 1) {
+		    	make_subFrame8();
+		    }
+		    else {
 			btn.setEnabled(true); // 들어갈때, 다시 저장버튼 활성화
 		    // jpg, png가 디폴트값
 			FileNameExtensionFilter filter = new FileNameExtensionFilter("jpg", "png", "jpg", "png");
@@ -231,26 +232,28 @@ public class image_change extends JFrame implements ActionListener {
 		        // 파일 선택
 		      	File[] f = fc.getSelectedFiles();		      	
 		        for(File n : f) {
-		        System.out.println("프로그램을 실행시키고 " + imageCnt++ + "번째 추가한 사진: " + n.getName());
+		        System.out.println("프로그램을 실행시키고 " + imageCnt+1 + "번째 추가한 사진: " + n.getName());
 		        imageName = n.getName();		         //이미지 파일 집어넣기(img경로, 복사할 img이름)
 		        }
 		       
 		        copyFile(fc.getSelectedFile(), imageName);
 		        for(int i=0; i<list.size(); i++) {
 		        	if(list.get(i).equals("image\\" + imageName)) {
+		        		make_subFrame9(i);
 		        		System.out.println(i + "번째 사진과 겹칩니다");
 		        		break;
 		        	}
 		        	if(i==list.size()-1) {
-
+		        		imageCnt++; // 최대 사진 개수2
 		        		make_subFrame(); // 저장하는 버튼창 나오는 함수 		   
 		        		list.add(new String("image\\" + imageName));
 				        button_index = MAX_SIZE;
 				        MAX_SIZE++; // 사진 최대 개수
 				        break;
-		        	}
-		        }		       		      		        
-	        }	  
+		        		}
+		        	}		       		      		        
+	        	}
+		    }
 		}
 		
 		// 사진 삭제
@@ -328,6 +331,19 @@ public class image_change extends JFrame implements ActionListener {
 					System.out.println(s + "사진을 찾았습니다.");
 					break;
 				}
+			}
+			if(flag == false && cnt==0)  {
+				cnt++;
+				System.out.println("찾는 사진이 없습니다.");
+			}
+		}
+		if(e.getSource() == btn3) {
+			int cnt=0;
+			int s = Integer.parseInt(tfd4.getText());
+			
+			tfd4.setText(""); // 입력 후 공백으로 초기화
+			if(s < MAX_SIZE && s > 0) {
+				button_index = s;
 			}
 			if(flag == false && cnt==0)  {
 				cnt++;
@@ -716,6 +732,7 @@ public class image_change extends JFrame implements ActionListener {
 		subFrame3.setVisible(true);
 	}			
 	
+	//사진 목록 
 	public void make_subFrame4() {
 		int max=0;
 		int max2=0;
@@ -728,7 +745,12 @@ public class image_change extends JFrame implements ActionListener {
 			}
 		}
 		JFrame subFrame4 = new JFrame("사진 목록");
-		subFrame4.setSize(max*60, MAX_SIZE*60);
+		if(max==0) {
+			subFrame4.setSize(400, 100);
+		}
+		else {
+			subFrame4.setSize(max*90, MAX_SIZE*60);
+		}
 		subFrame4.addWindowListener(new WindowAdapter() {
 		public void windowClosing(WindowEvent windowEvent) {	
 				subFrame4.setVisible(false);
@@ -766,6 +788,7 @@ public class image_change extends JFrame implements ActionListener {
 		subFrame4.setVisible(true);
 	}
 	
+	//작업 창
 	public void make_subFrame5() {
 		JFrame subFrame5 = new JFrame("작업");
 		subFrame5.setSize(300, 400);
@@ -812,32 +835,7 @@ public class image_change extends JFrame implements ActionListener {
 		subFrame5.setVisible(true);
 	}
 	
-	public void make_subFrame7() {
-		JFrame subFrame7 = new JFrame("사진 내용");
-		subFrame7.setSize(300, 200);
-		subFrame7.setBounds(300, 100, 450, 200);
-		subFrame7.addWindowListener(new WindowAdapter() {
-		public void windowClosing(WindowEvent windowEvent) {	
-				subFrame7.setVisible(false);
-				subFrame7.dispose();
-			}
-		});				
-		
-		Panel p1 = new Panel();
-		p1.setLayout(new FlowLayout());
-		
-		JLabel label1 = new JLabel(memo.get(button_index));
-		label1.setFont(new Font("나눔고딕",Font.BOLD,22));		
-		label1.setForeground(Color.white);
-		p1.setBackground(Color.black);
-		
-		p1.add(label1);
-
-		subFrame7.setResizable(false); // 창 조정 x
-		subFrame7.add(p1);
-		subFrame7.setVisible(true);
-	}
-	
+	//앨범 색 변경창
 	public void make_subFrame6() {
 		JFrame subFrame6 = new JFrame("앨범 배경색 변경");
 		subFrame6.setSize(600, 300);
@@ -946,6 +944,83 @@ public class image_change extends JFrame implements ActionListener {
 		subFrame6.add(p1);
 		subFrame6.setVisible(true);
 	}
+	
+	//사진 내용 보기
+	public void make_subFrame7() {
+		JFrame subFrame7 = new JFrame("사진 내용");
+		subFrame7.setSize(600, 400);
+		subFrame7.setBounds(300, 100, 450, 200);
+		subFrame7.addWindowListener(new WindowAdapter() {
+		public void windowClosing(WindowEvent windowEvent) {	
+				subFrame7.setVisible(false);
+				subFrame7.dispose();
+			}
+		});				
+		
+		Panel p1 = new Panel();
+		p1.setLayout(new FlowLayout());
+		
+		JLabel label1 = new JLabel(memo.get(button_index));
+		label1.setFont(new Font("나눔고딕",Font.BOLD,22));		
+		label1.setForeground(Color.white);
+		p1.setBackground(Color.black);
+		
+		p1.add(label1);
+
+		subFrame7.setResizable(false); // 창 조정 x
+		subFrame7.add(p1);
+		subFrame7.setVisible(true);
+	}
+	
+	//사진 2개 초과시 위험경보창
+	public void make_subFrame8() {
+		JFrame subFrame8 = new JFrame("중독 주의!");
+		subFrame8.setSize(800,200);
+		subFrame8.addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent windowEvent) {	
+				subFrame8.setVisible(false);
+				subFrame8.dispose();
+			}
+		});			
+		
+		Panel p1 = new Panel();
+		p1.setLayout(new GridLayout(2,1));
+		p1.add(new Label("위험) 이 프로그램은 실행하고 2개만 추가 가능합니다. (중독 예방차원)"));
+		p1.add(new Label("          급하면 프로그램을 종료하고 다시 실행해서 추가 해주세요."));
+
+		p1.setFont(new Font("나눔고딕", Font.BOLD, 22));		
+		p1.setForeground(Color.white);
+		p1.setBackground(Color.black);
+
+		subFrame8.setResizable(false); // 창 조정 x
+		subFrame8.add(p1);
+		subFrame8.setVisible(true);
+	}		
+	
+	//사진 추가할때 겹치는 사진 인경우
+		public void make_subFrame9(int index) {
+			JFrame subFrame9 = new JFrame("사진 겹침 주의!");
+			subFrame9.setSize(900,100);
+			subFrame9.addWindowListener(new WindowAdapter() {
+				public void windowClosing(WindowEvent windowEvent) {	
+					subFrame9.setVisible(false);
+					subFrame9.dispose();
+				}
+			});			
+			
+			Panel p1 = new Panel();
+			p1.setLayout(new GridLayout(2,1));
+			p1.add(new Label("추가하려는 사진이" + index + "번째 사진과 겹칩니다." + index + "번째 사진을 지우고 다시 추가하세요."));
+
+			p1.setFont(new Font("나눔고딕", Font.BOLD, 22));		
+			p1.setForeground(Color.white);
+			p1.setBackground(Color.black);
+
+			subFrame9.setResizable(false); // 창 조정 x
+			subFrame9.add(p1);
+			subFrame9.setVisible(true);
+		}		
+	
 	public void sort() {
 	//사진 이름순 오름차순
 		//Collections.sort(list,Collections.reverseOrder()); 
