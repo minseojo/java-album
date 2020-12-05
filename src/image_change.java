@@ -20,7 +20,7 @@ public class image_change extends JFrame implements ActionListener {
 	String[] copyName = new String[1000];
 	String[] copyMemo = new String[1000];
 	File file = new File("image\\test.txt");	
-	private JButton button1, button2, button3, button4, button5, button6, button7, button8, btn4, btn5, btn6; //다음 버튼, 이전 버튼, 사진 추가, 사진 삭제, 사진 검색, 편집, 모두보기, 이동, 사진 정렬(8910)
+	private JButton button1, button2, button3, button4, button5, button6, button7, button8, btn4, btn5, btn6, btn7 ; //다음 버튼, 이전 버튼, 사진 추가, 사진 삭제, 사진 검색, 편집, 모두보기, 이동, 사진 정렬(8910), 초기화
 	private JButton BCbtn1,BCbtn2,BCbtn3,BCbtn4,BCbtn5,BCbtn6,BCbtn7,BCbtn8,BCbtn9,BCbtn10,BCbtn11,BCbtn12;
 	private JPanel imgPanel; // 이미지 나오는 창
 	private int button_index = 0; // 이미지 인덱스(1 ~ 사진 최대 개수, 0은 이미지없음 사진)
@@ -235,7 +235,7 @@ public class image_change extends JFrame implements ActionListener {
 		        	}		       		      		        
 	        	}
 		    }
-		}
+		}   
 		
 		// 사진 삭제
 		if(e.getSource() == button4 && button_index > 0 && MAX_SIZE > 1 ) {	
@@ -344,6 +344,10 @@ public class image_change extends JFrame implements ActionListener {
 		if(e.getSource() == btn6) {
 			sort();
 		}
+		if(e.getSource() == btn7) {
+			make_subFrame10();
+			reset();
+		}
 		//흰 라그 그 다그 검 빨 오 노 초 파 핑 씨
 		if(e.getSource() == BCbtn1) {
 			panel.setBackground(Color.white);
@@ -426,6 +430,29 @@ public class image_change extends JFrame implements ActionListener {
         }
 	}
 	
+	public void reset() {
+		String path = "image\\";
+		File folder = new File(path);
+		try {
+		    while(folder.exists()) {
+			File[] folder_list = folder.listFiles(); //파일리스트 얻어오기
+					
+			for (int j = 0; j < folder_list.length; j++) {
+				folder_list[j].delete(); //파일 삭제 
+				System.out.println("파일이 삭제되었습니다.");
+				button_index=0;
+				MAX_SIZE=1;
+			}
+					
+			if(folder_list.length == 0 && folder.isDirectory()){ 
+				folder.delete(); //대상폴더 삭제
+				System.out.println("폴더가 삭제되었습니다.");
+			}
+	            }
+		 } catch (Exception e) {
+			e.getStackTrace();
+		}
+	}
 	//메인 프레임 만들기
 	public void make_mainFrame() {
 		imgPanel = new ChangeImagePanel();
@@ -759,35 +786,42 @@ public class image_change extends JFrame implements ActionListener {
 		});				
 		
 		Panel p1 = new Panel();
-		p1.setLayout(new GridLayout(3,1));
+		p1.setLayout(new GridLayout(4,1));
 		
 		btn4 = new JButton("앨범 배경색 바꾸기");
 		btn5 = new JButton("내용 보기");
 		btn6 = new JButton("사진 순서 반대로 바꾸기");
+		btn7 = new JButton("초기화");
 		
 		btn4.setBorderPainted(false);	
 		btn5.setBorderPainted(false);
 		btn6.setBorderPainted(false);
+		btn7.setBorderPainted(false);
 		
 		btn4.addActionListener(this);				
 		btn5.addActionListener(this);
 		btn6.addActionListener(this);
+		btn7.addActionListener(this);
 		
 		btn4.setBackground(Color.black);
 		btn5.setBackground(Color.black);
 		btn6.setBackground(Color.black);
+		btn7.setBackground(Color.black);
 		
 		btn4.setFont(new Font("나눔고딕", Font.BOLD, 14));
 		btn5.setFont(new Font("나눔고딕", Font.BOLD, 14));
 		btn6.setFont(new Font("나눔고딕", Font.BOLD, 14));
+		btn7.setFont(new Font("나눔고딕", Font.BOLD, 14));
 		
 		btn4.setForeground(Color.white);
 		btn5.setForeground(Color.white);
 		btn6.setForeground(Color.white);
+		btn7.setForeground(Color.white);
 		
 		p1.add(btn5);
 		p1.add(btn6);
 		p1.add(btn4);
+		p1.add(btn7);
 		
 		subFrame5.setResizable(false); // 창 조정 x
 		subFrame5.add(p1);
@@ -979,7 +1013,28 @@ public class image_change extends JFrame implements ActionListener {
 			subFrame9.add(p1);
 			subFrame9.setVisible(true);
 		}		
-	
+		//앨범 초기화
+		public void make_subFrame10() {
+			JFrame subFrame10 = new JFrame("초기화!");
+			subFrame10.setSize(700,100);
+			subFrame10.addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent windowEvent) {	
+				setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+				}
+			});			
+					
+			Panel p1 = new Panel();
+			p1.setLayout(new GridLayout(2,1));
+			p1.add(new Label("앨범을 초기화 했습니다. 프로그램을 껐다 키세요."));
+
+			p1.setFont(new Font("나눔고딕", Font.BOLD, 22));		
+			p1.setForeground(Color.white);
+			p1.setBackground(Color.black);
+
+			subFrame10.setResizable(false); // 창 조정 x
+			subFrame10.add(p1);
+			subFrame10.setVisible(true);
+		}			
 	public void sort() {
 	//사진 이름순 오름차순
 		//Collections.sort(list,Collections.reverseOrder()); 
